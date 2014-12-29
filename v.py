@@ -54,25 +54,34 @@ class TextDisplay(object):
     self.render()
     self.stdscr.refresh()
 
-  def raw_insert(self, string, location):
+  def raw_insert_at(self, string, location):
     self.text = self.text[:location] + string + self.text[location:]
 
   def insert_at(self, string, location):
     self.cursors = [cursor if cursor < location else cursor + len(string)
                     for cursor in self.cursors]
-    self.raw_insert(string, location)
+    self.raw_insert_at(string, location)
 
   def insert(self, string):
     for cursor in self.cursors:
       self.insert_at(string, cursor)
 
+class TextEditorController(object):
+  def __init__(self, stdscr, display):
+    self.stdscr = stdscr
+    self.display = display
+
+  def main(self):
+    self.display.refresh()
+    while True:
+      key = self.stdscr.getkey()
+      self.display.insert(repr(key))
+      self.display.refresh()
+
 def main(stdscr):
   display = TextDisplay(stdscr)
-  display.insert("Hello world!\n\nSecond line!\n")
-  display.insert("hi there! ")
-  display.insert("Didn't see you there.\n")
-  display.refresh()
-  time.sleep(3)
+  controller = TextEditorController(stdscr, display)
+  controller.main()
 
 if __name__ == '__main__':
   curses.wrapper(main)
